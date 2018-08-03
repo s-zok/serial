@@ -17,7 +17,7 @@ import (
 	//"unsafe"
 )
 
-func openPort(name string, baud int, databits byte, parity Parity, stopbits StopBits, readTimeout time.Duration) (p *Port, err error) {
+func openPort(name string, baud int, databits byte, parity Parity, stopbits StopBits, XONFlowControl bool, readTimeout time.Duration) (p *Port, err error) {
 	f, err := os.OpenFile(name, syscall.O_RDWR|syscall.O_NOCTTY|syscall.O_NONBLOCK, 0666)
 	if err != nil {
 		return
@@ -87,7 +87,9 @@ func openPort(name string, baud int, databits byte, parity Parity, stopbits Stop
 
 	// Turn off break interrupts, CR->NL, Parity checks, strip, and IXON
 	st.c_iflag &= ^C.tcflag_t(C.BRKINT | C.ICRNL | C.INPCK | C.ISTRIP | C.IXOFF | C.IXON | C.PARMRK)
-
+	if XONFlowControl {
+		st.c_iflag |= C.IXON | C.IXOFF
+	}
 	// Select local mode, turn off parity, set to 8 bits
 	st.c_cflag &= ^C.tcflag_t(C.CSIZE | C.PARENB)
 	st.c_cflag |= (C.CLOCAL | C.CREAD)

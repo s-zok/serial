@@ -110,7 +110,7 @@ type Config struct {
 
 	// RTSFlowControl bool
 	// DTRFlowControl bool
-	// XONFlowControl bool
+	XONFlowControl bool
 
 	// CRLFTranslate bool
 }
@@ -136,7 +136,7 @@ func OpenPort(c *Config) (*Port, error) {
 	if stop == 0 {
 		stop = Stop1
 	}
-	return openPort(c.Name, c.Baud, size, par, stop, c.ReadTimeout)
+	return openPort(c.Name, c.Baud, size, par, stop, c.XONFlowControl, c.ReadTimeout)
 }
 
 // Converts the timeout values for Linux / POSIX systems

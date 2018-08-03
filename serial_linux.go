@@ -10,7 +10,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func openPort(name string, baud int, databits byte, parity Parity, stopbits StopBits, readTimeout time.Duration) (p *Port, err error) {
+func openPort(name string, baud int, databits byte, parity Parity, stopbits StopBits, XONFlowControl bool, readTimeout time.Duration) (p *Port, err error) {
 	var bauds = map[int]uint32{
 		50:      unix.B50,
 		75:      unix.B75,
@@ -97,10 +97,18 @@ func openPort(name string, baud int, databits byte, parity Parity, stopbits Stop
 	default:
 		return nil, ErrBadParity
 	}
+
+	iflagToUse := uint32(unix.IGNPAR)
+
+	if XONFlowControl {
+		iflagToUse |= unix.IXON
+		iflagToUse |= unix.IXOFF
+	}
+
 	fd := f.Fd()
 	vmin, vtime := posixTimeoutValues(readTimeout)
 	t := unix.Termios{
-		Iflag:  unix.IGNPAR,
+		Iflag:  iflagToUse,
 		Cflag:  cflagToUse,
 		Ispeed: rate,
 		Ospeed: rate,
