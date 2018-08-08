@@ -197,3 +197,7 @@ func (p *Port) Flush() error {
 func (p *Port) Close() (err error) {
 	return p.f.Close()
 }
+
+func (p *Port) Set(signals Signals) error {
+	return fmt.Errorf("Not implemeted yet")
+}

@@ -93,6 +93,10 @@ func (p *Port) Close() error {
 	return p.f.Close()
 }
 
+func (p *Port) Set(signals Signals) error {
+	return fmt.Errorf("Not implemeted yet")
+}
+
 func (p *Port) Write(buf []byte) (int, error) {
 	p.wl.Lock()
 	defer p.wl.Unlock()

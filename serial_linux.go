@@ -169,3 +169,67 @@ func (p *Port) Flush() error {
 func (p *Port) Close() (err error) {
 	return p.f.Close()
 }
+
+func (p *Port) Set(signals Signals) error {
+	var bits int
+
+	_, _, errno := unix.Syscall(
+		unix.SYS_IOCTL,
+		uintptr(p.f.Fd()),
+		uintptr(unix.TIOCMGET),
+		uintptr(unsafe.Pointer(&bits)),
+	)
+
+	if errno != 0 {
+		return errno
+	}
+
+	bits &= ^(unix.TIOCM_RTS | unix.TIOCM_CTS | unix.TIOCM_DTR | unix.TIOCM_DSR)
+
+	if signals.RTS {
+		bits |= unix.TIOCM_RTS
+	}
+
+	if signals.CTS {
+		bits |= unix.TIOCM_CTS
+	}
+
+	if signals.DTR {
+		bits |= unix.TIOCM_DTR
+	}
+
+	if signals.DSR {
+		bits |= unix.TIOCM_DSR
+	}
+
+	if signals.BRK {
+		_, _, errno = unix.Syscall(
+			unix.SYS_IOCTL,
+			uintptr(p.f.Fd()),
+			uintptr(unix.TIOCSBRK),
+			0,
+		)
+		if errno != 0 {
+			return errno
+		}
+	} else {
+		_, _, errno = unix.Syscall(
+			unix.SYS_IOCTL,
+			uintptr(p.f.Fd()),
+			uintptr(unix.TIOCCBRK),
+			0,
+		)
+		if errno != 0 {
+			return errno
+		}
+	}
+
+	_, _, errno = unix.Syscall(
+		unix.SYS_IOCTL,
+		uintptr(p.f.Fd()),
+		uintptr(unix.TIOCMSET),
+		uintptr(unsafe.Pointer(&bits)),
+	)
+
+	return errno
+}

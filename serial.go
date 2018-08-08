@@ -115,6 +115,14 @@ type Config struct {
 	// CRLFTranslate bool
 }
 
+type Signals struct {
+	BRK bool
+	CTS bool
+	DSR bool
+	DTR bool
+	RTS bool
+}
+
 // ErrBadSize is returned if Size is not supported.
 var ErrBadSize error = errors.New("unsupported serial data size")
 
